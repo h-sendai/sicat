@@ -253,6 +253,7 @@ int usage()
 "-N:             Do not output received data even if output is redirected.\n"
 "-Q:             Really quiet mode.  Does not display progress, summary.\n"
 "-S sleep_time:  Sleep sleep_time sec before sending every request.\n"
+"                You may use float number (e.g. -S 0.1).  Default is 0.\n"
 "-T timeout:     Specify timeout (sec).  May be float value.\n"
 "To save data, do not specify -N option and redirect output to file:\n"
 "sicat 192.168.0.16 > datafile\n"
