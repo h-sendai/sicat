@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 	host_info *hp;
 	float sleep_time = 0.0;
 	float timeout  = 2.0;
+	float sleep_on_request = 0.0;
 	int eflag = 0;
 	int nflag = 0;
 	int sflag = 0;
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 	int Lflag = 0;
 	int Nflag = 0;
 	int Qflag = 0;
+	int Sflag = 0;
 	int Tflag = 0;
 	int zero_count = 0;
 	int interleave_count = 0;
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "e:FghI:Ln:Ns:tT:qQz")) != -1) {
+	while ((ch = getopt(argc, argv, "e:FghI:Ln:Ns:S:tT:qQz")) != -1) {
 		switch (ch) {
 			case 'e':
 				eflag = 1;
@@ -117,6 +119,10 @@ int main(int argc, char *argv[])
 			case 'Q':
 				Qflag = 1;
 				qflag = 1;
+				break;
+			case 'S':
+				Sflag = 1;
+				sleep_on_request = atof(optarg);
 				break;
 			case 'T':
 				Tflag = 1;
@@ -180,6 +186,9 @@ int main(int argc, char *argv[])
 			total_events = 0;
 			total_bytes  = 0;
 		}
+		if (Sflag) {
+			usleep(sleep_on_request * 1000000);
+		}
 		request_count ++;
 		send_len_request(hp);
 		while (hp->status != RECV_DATA_FIN) {
@@ -235,15 +244,16 @@ int usage()
 "-s sleep_time:  Sleep sleep_time before sending 1st request.\n"
 "                You may use float number (e.g. -s 0.1).  Default is 0.\n"
 "-q:             Do not display progress counter.  Does display summary.\n"
-"-Q:             Really quiet mode.  Does not display progress, summary.\n"
 "-t:             Prepend timestamp.\n" 
-"-T timeout:     Specify timeout (sec).  May be float value.\n"
 "-z:             Exit after 5 times zero event count\n"
 "-F:             Forever.  Ignore event number in -n option.\n"
 "-I wait:        Get data forever and print result every wait request times.\n"
 "                This flag set -t, -q, and -F implicitly.\n"
 "-L:             Do not send FIN but RST when socket closes.\n"
 "-N:             Do not output received data even if output is redirected.\n"
+"-Q:             Really quiet mode.  Does not display progress, summary.\n"
+"-S sleep_time:  Sleep sleep_time sec before sending every request.\n"
+"-T timeout:     Specify timeout (sec).  May be float value.\n"
 "To save data, do not specify -N option and redirect output to file:\n"
 "sicat 192.168.0.16 > datafile\n"
 ;
