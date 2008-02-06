@@ -11,7 +11,7 @@ unsigned char len_request[8];
 volatile sig_atomic_t total_events     = 0;
 volatile sig_atomic_t total_bytes      = 0;
 volatile sig_atomic_t has_interrupted  = 0;
-int loop_count = 0;
+int request_count = 0;
 int gflag = 0;
 
 void sig_int(int signo)
@@ -169,18 +169,18 @@ int main(int argc, char *argv[])
 			break;
 		}
 		if (! Fflag) {
-			if (loop_count == n_request) {
+			if (request_count == n_request) {
 				break;
 			}
 		}
-		if (Iflag && interleave_count == loop_count) {
+		if (Iflag && interleave_count == request_count) {
 			fprintf(stderr, "%s ", gf_time());
 			print_result();
-			loop_count   = 0;
+			request_count   = 0;
 			total_events = 0;
 			total_bytes  = 0;
 		}
-		loop_count ++;
+		request_count ++;
 		send_len_request(hp);
 		while (hp->status != RECV_DATA_FIN) {
 			process_data(hp);
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 			if (tflag) {
 				fprintf(stderr, "%s ", gf_time());
 			}
-			fprintf(stderr, "request # %4d ", loop_count);
+			fprintf(stderr, "request # %4d ", request_count);
 			fprintf(stderr, "%5d events ( %5d bytes )\n",
 				hp->data_len/4, hp->data_counter);
 		}
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 
 void print_result(void)
 {
-	fprintf(stderr, "Request Counts: %d | ",    loop_count);
+	fprintf(stderr, "Request Counts: %d | ",    request_count);
 	fprintf(stderr, "Total Events: %d | ",      total_events);
 	fprintf(stderr, "Total Bytes: %d bytes\n",  total_bytes );
 	return;
@@ -240,7 +240,7 @@ int usage()
 "-T timeout:     Specify timeout (sec).  May be float value.\n"
 "-z:             Exit after 5 times zero event count\n"
 "-F:             Forever.  Ignore event number in -n option.\n"
-"-I wait:        Get data forever and print result every wait sec.\n"
+"-I wait:        Get data forever and print result every wait request times.\n"
 "                This flag set -t, -q, and -F implicitly.\n"
 "-L:             Do not send FIN but RST when socket closes.\n"
 "-N:             Do not output received data even if output is redirected.\n"

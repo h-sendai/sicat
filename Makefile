@@ -1,4 +1,4 @@
-CFLAGS += -g -Wall -O0
+CFLAGS = -g -Wall -O0
 PROG = sicat
 SRCS += sicat.c
 SRCS += sicat.h
