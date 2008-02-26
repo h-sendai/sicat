@@ -57,10 +57,12 @@ int main(int argc, char *argv[])
 	int Lflag = 0;
 	int Nflag = 0;
 	int Qflag = 0;
+	int Rflag = 0;
 	int Sflag = 0;
 	int Tflag = 0;
 	int zero_count = 0;
 	int interleave_count = 0;
+	int so_rcvbuf;
 
 	struct linger linger_time;
 	linger_time.l_onoff  = 1;
@@ -77,7 +79,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "e:FghI:Ln:Nors:S:tT:w:qQz")) != -1) {
+	while ((ch = getopt(argc, argv, "e:FghI:Ln:NoqQrR:s:S:tT:w:z")) != -1) {
 		switch (ch) {
 			case 'e':
 				eflag = 1;
@@ -98,6 +100,10 @@ int main(int argc, char *argv[])
 				break;
 			case 'r':
 				rflag = 1;
+				break;
+			case 'R':
+				Rflag = 1;
+				so_rcvbuf = atoi(optarg);
 				break;
 			case 's':
 				sflag = 1;
@@ -174,10 +180,14 @@ int main(int argc, char *argv[])
 		perror("connection fail");
 		exit(1);
 	}
+	/* Socket Options */
 	if (Lflag) {
 		setsockopt(hp->sockfd, SOL_SOCKET, SO_LINGER, &linger_time, sizeof(linger_time));
 	}
-	
+	if (Rflag) {
+		setsockopt(hp->sockfd, SOL_SOCKET, SO_RCVBUF, &so_rcvbuf, sizeof(so_rcvbuf));
+	}
+
 	if (oflag) {
 		print_tcp_moderate_rcvbuf();
 		print_sockopt(hp->sockfd);
@@ -274,6 +284,7 @@ int usage()
 "-L:             Do not send FIN but RST when socket closes.\n"
 "-N:             Do not output received data even if output is redirected.\n"
 "-Q:             Really quiet mode.  Does not display progress, summary.\n"
+"-R so_rcvbuf:   Specify SO_RCVBUF socket option.  Default is system default.\n"
 "-S sleep_time:  Sleep sleep_time sec before sending every request.\n"
 "                You may use float number (e.g. -S 0.1).  Default is 0.\n"
 "-T timeout:     Specify timeout (sec).  May be float value.\n"
