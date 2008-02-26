@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 	float sleep_on_request = 0.0;
 	int eflag = 0;
 	int nflag = 0;
+	int oflag = 0;
 	int sflag = 0;
 	int qflag = 0;
 	int tflag = 0;
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "e:FghI:Ln:Nrs:S:tT:w:qQz")) != -1) {
+	while ((ch = getopt(argc, argv, "e:FghI:Ln:Nors:S:tT:w:qQz")) != -1) {
 		switch (ch) {
 			case 'e':
 				eflag = 1;
@@ -88,6 +89,9 @@ int main(int argc, char *argv[])
 			case 'n':
 				nflag = 1;
 				n_request = atoi(optarg);
+				break;
+			case 'o':
+				oflag = 1;
 				break;
 			case 'q':
 				qflag = 1;
@@ -174,6 +178,11 @@ int main(int argc, char *argv[])
 		setsockopt(hp->sockfd, SOL_SOCKET, SO_LINGER, &linger_time, sizeof(linger_time));
 	}
 	
+	if (oflag) {
+		print_tcp_moderate_rcvbuf();
+		print_sockopt(hp->sockfd);
+	}
+
 	/* XXX wait for data preparation */
 	if (sflag) {
 		fprintf(stderr, "sleeping %4.2f sec (by -s option)\n", sleep_time);
@@ -251,6 +260,7 @@ int usage()
 "-n request_num: Number of length requests.  You may specify 0 to verify\n"
 "                the TCP connection between PC and SiTCP module.\n"
 "                Default is 4.\n"
+"-o:             Print socket options and tcp_modereate_rcvbuf before run.\n"
 "-r:             Print how many bytes each read() system call returns.\n"
 "-s sleep_time:  Sleep sleep_time before sending 1st request.\n"
 "                You may use float number (e.g. -s 0.1).  Default is 0.\n"
@@ -271,7 +281,7 @@ int usage()
 "sicat 192.168.0.16 > datafile\n"
 ;
 
-	fprintf(stderr, "%s [-t] [-z] [-N] [-e event_num] [-s sleep] [-T timeout] [-n n_request | -F] ip_address\n", progname);
+	fprintf(stderr, "%s [options] ip_address\n", progname);
 	fprintf(stderr, "%s", help_message);
 	exit(0);
 }

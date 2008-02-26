@@ -46,6 +46,8 @@ extern int send_len_request_to_all(void);
 extern int init_host_info_counter(host_info *);
 extern int print_status(host_info *);
 extern char *gf_time(void);
+extern int print_sockopt(int);
+extern int print_tcp_moderate_rcvbuf(void);
 
 //extern int eflag, hflag, nflag, sflag, qflag;
 //extern char *progname;
