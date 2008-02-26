@@ -13,6 +13,9 @@ volatile sig_atomic_t total_bytes      = 0;
 volatile sig_atomic_t has_interrupted  = 0;
 int request_count = 0;
 int gflag = 0;
+int rflag = 0;
+int wflag = 0;
+int sleep_before_read = 0;
 
 void sig_int(int signo)
 {
@@ -73,7 +76,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "e:FghI:Ln:Ns:S:tT:qQz")) != -1) {
+	while ((ch = getopt(argc, argv, "e:FghI:Ln:Nrs:S:tT:w:qQz")) != -1) {
 		switch (ch) {
 			case 'e':
 				eflag = 1;
@@ -89,12 +92,19 @@ int main(int argc, char *argv[])
 			case 'q':
 				qflag = 1;
 				break;
+			case 'r':
+				rflag = 1;
+				break;
 			case 's':
 				sflag = 1;
 				sleep_time = atof(optarg);
 				break;
 			case 't':
 				tflag = 1;
+				break;
+			case 'w':
+				wflag = 1;
+				sleep_before_read = atoi (optarg);
 				break;
 			case 'z':
 				zflag = 1;
@@ -241,10 +251,12 @@ int usage()
 "-n request_num: Number of length requests.  You may specify 0 to verify\n"
 "                the TCP connection between PC and SiTCP module.\n"
 "                Default is 4.\n"
+"-r:             Print how many bytes each read() system call returns.\n"
 "-s sleep_time:  Sleep sleep_time before sending 1st request.\n"
 "                You may use float number (e.g. -s 0.1).  Default is 0.\n"
 "-q:             Do not display progress counter.  Does display summary.\n"
 "-t:             Prepend timestamp.\n" 
+"-w sleep_time:  Sleep sleep_time u seconds before each read() system call.\n"
 "-z:             Exit after 5 times zero event count\n"
 "-F:             Forever.  Ignore event number in -n option.\n"
 "-I wait:        Get data forever and print result every wait request times.\n"

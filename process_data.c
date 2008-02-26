@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include "sicat.h"
 
+extern int rflag; 
+extern int wflag;
+extern int sleep_before_read;
+
 int init_host_info_counter(host_info *hp) {
 	hp->len_counter  = 0;
 	hp->data_counter = 0;
@@ -124,6 +128,9 @@ int process_data(host_info *hp)
 	 * when sigaction() if we setsockopt() SO_RCVTIMEO.
 	 */
 
+	if (wflag) {
+		usleep(sleep_before_read);
+	}
 	read_again:
 	n = read(hp->sockfd, hp->read_buf, sizeof(hp->read_buf));
 	if (n < 0) {
@@ -134,6 +141,9 @@ int process_data(host_info *hp)
 			perror("read error in process_data");
 			exit(1);
 		}
+	}
+	if (rflag) {
+		fprintf(stderr, "%d bytes read\n", n);
 	}
 
 	switch(hp->status) {
