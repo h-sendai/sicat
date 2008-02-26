@@ -1,0 +1,50 @@
+=pod
+
+=head1 NAME
+
+B<sicat> -- Read from one PSD module
+
+=head1 SYNOPSIS
+
+B<sicat> [-e event_num] [-F] [-g] [-h] [-I interleave] [-L] [-n request_num] [-N] [-r] [-s seconds] [-t] [-T timeout] [-w micro_seconds] [-Q] [-z] ip_address
+
+=head1 DESCRIPTION
+
+B<sicat> reads from one PSD module or PSD module emulator.
+To save read data, you have to redirect the output like:
+
+  sicat 192.168.0.16 > data_file
+
+By default, B<sicat> sends 4 length requests to PSD module.  You may use
+B<-F> to request forever or B<-n> option to specify request count.
+
+=head1 OPTIONS
+
+Becase B<sicat> is used mainly as debugging tool, it has many options.
+
+=over 4
+
+=item -e event_num
+
+Specify event number of each length request.  Default is 4096.
+
+=item -F
+
+Forever mode.  Send request forever until interrupt (Ctrl-C or alike).
+
+=item -g
+
+Exit after reading all data and just before sending new length request
+when receive SIGINT or SIGTERM.
+If this option does not specified, exit immediately when receive
+SIGINT or SIGTERM.
+
+=item -h
+
+Display help message.
+
+=item -I I<interleave count>
+
+Display request counts, read bytes every I<interleave count>. 
+
+=cut
