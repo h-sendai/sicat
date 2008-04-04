@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 	int eflag = 0;
 	int nflag = 0;
 	int oflag = 0;
+	int pflag = 0;
 	int sflag = 0;
 	int qflag = 0;
 	int tflag = 0;
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
 	int zero_count = 0;
 	int interleave_count = 0;
 	int so_rcvbuf;
+	int port;
 
 	struct linger linger_time;
 	linger_time.l_onoff  = 1;
@@ -79,7 +81,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "e:FghI:Ln:NoqQrR:s:S:tT:w:z")) != -1) {
+	while ((ch = getopt(argc, argv, "e:FghI:Ln:Nop:qQrR:s:S:tT:w:z")) != -1) {
 		switch (ch) {
 			case 'e':
 				eflag = 1;
@@ -94,6 +96,10 @@ int main(int argc, char *argv[])
 				break;
 			case 'o':
 				oflag = 1;
+				break;
+			case 'p':
+				pflag = 1;
+				port = atoi(optarg);
 				break;
 			case 'q':
 				qflag = 1;
@@ -175,6 +181,9 @@ int main(int argc, char *argv[])
 	hp = create_host_info_struct(argv[0]);
 	prepare_len_request_array(n_event);
 
+	if (pflag) {
+		hp->port = port;
+	}
 	if ( (hp->sockfd = connect_tcp(hp->ip_address, hp->port, timeout)) < 0) {
 		fprintf(stderr, "connection fail: %s\n", hp->ip_address);
 		perror("connection fail");
@@ -274,6 +283,7 @@ int usage()
 "-r:             Print how many bytes each read() system call returns.\n"
 "-s sleep_time:  Sleep sleep_time before sending 1st request.\n"
 "                You may use float number (e.g. -s 0.1).  Default is 0.\n"
+"-p port:        Specify server port.  Default server port is 23.\n"
 "-q:             Do not display progress counter.  Does display summary.\n"
 "-t:             Prepend timestamp.\n" 
 "-w sleep_time:  Sleep sleep_time u seconds before each read() system call.\n"
