@@ -19,7 +19,12 @@ int sleep_before_read = 0;
 
 void sig_int(int signo)
 {
-	fprintf(stderr, "SIGINT\n");
+	if (signo == SIGINT) {
+		fprintf(stderr, "SIGINT\n");
+	}
+	if (signo == SIGALRM) {
+		fprintf(stderr, "SIGALRM\n");
+	}
 
 	if (gflag) {
 		has_interrupted = 1;
@@ -31,6 +36,11 @@ void sig_int(int signo)
 	}
 }
 		
+void sig_alarm(int signo)
+{
+	sig_int(signo);
+}
+
 void sig_quit(int signo)
 {
 	exit(0);
@@ -45,6 +55,7 @@ int main(int argc, char *argv[])
 	float sleep_time = 0.0;
 	float timeout  = 2.0;
 	float sleep_on_request = 0.0;
+	int aflag = 0;
 	int eflag = 0;
 	int nflag = 0;
 	int oflag = 0;
@@ -63,6 +74,8 @@ int main(int argc, char *argv[])
 	int Tflag = 0;
 	int zero_count = 0;
 	int interleave_count = 0;
+	double alarm_usec = 0.0;
+
 	int so_rcvbuf;
 	int port;
 
@@ -81,8 +94,13 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "e:FghI:Ln:Nop:qQrR:s:S:tT:w:z")) != -1) {
+	while ((ch = getopt(argc, argv, "a:e:FghI:Ln:Nop:qQrR:s:S:tT:w:z")) != -1) {
 		switch (ch) {
+			case 'a':
+				aflag = 1;
+				Fflag = 1;
+				alarm_usec = (atof(optarg) * 1000000);
+				break;
 			case 'e':
 				eflag = 1;
 				n_event = atoi(optarg);
@@ -177,6 +195,10 @@ int main(int argc, char *argv[])
 	
 	my_signal(SIGINT,  sig_int);
 	my_signal(SIGQUIT, sig_quit);
+	if (aflag) {
+		my_signal(SIGALRM, sig_int);
+		ualarm(alarm_usec, alarm_usec);
+	}
 
 	hp = create_host_info_struct(argv[0]);
 	prepare_len_request_array(n_event);
@@ -273,6 +295,7 @@ int usage()
 {
 	char *help_message;
 	help_message = 
+"-a sec          Exit after sec seconds.  sec may be float number.\n"
 "-e event_num:   Number of events for every length requests.\n"
 "                Default is 4096.\n"
 "-g:             When interrupted, read all remaining data.\n"
