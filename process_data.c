@@ -87,6 +87,10 @@ int read_data(host_info *hp, unsigned char *ptr, int n)
 int read_len(host_info *hp, int n)
 {
 	if (n >= LEN_LEN - hp->len_counter) {
+		/*
+		 * has read all length bytes.
+		 * hp->read_buf may contain event data.
+		 */
 		bcopy(
 			hp->read_buf, 
 			&(hp->len_buf[hp->len_counter]),
@@ -110,8 +114,13 @@ int read_len(host_info *hp, int n)
 		}
 	}
 	else {
-		bcopy(&(hp->len_buf[hp->len_counter]), hp->read_buf, n);
-		hp->len_counter = n;
+		/*
+		 * has not read all length bytes.
+		 * All read bytes (in hp->read_buf) are length bytes elements only
+		 * (no event data in hp->read_buf).
+		 */
+		bcopy(hp->read_buf, &(hp->len_buf[hp->len_counter]), n);
+		hp->len_counter += n;
 	}
 	return 0;
 }
