@@ -1,6 +1,8 @@
 #ifndef _SELECT_TEST_H
 #define _SELECT_TEST_H 1
 
+#define SICAT_VERSION "1.1 (2008-12-02)"
+
 /*
 buufer too large.  consume much time to memset(0).
 #define READ_BUF_SIZE	1 * 1024 * 1024

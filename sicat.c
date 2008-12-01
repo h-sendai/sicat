@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 	int sflag = 0;
 	int qflag = 0;
 	int tflag = 0;
+	int vflag = 0;
 	int zflag = 0;
 	int Fflag = 0;
 	int Iflag = 0;
@@ -94,7 +95,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "a:e:FghI:Ln:Nop:qQrR:s:S:tT:w:z")) != -1) {
+	while ((ch = getopt(argc, argv, "a:e:FghI:Ln:Nop:qQrR:s:S:tT:vw:z")) != -1) {
 		switch (ch) {
 			case 'a':
 				aflag = 1;
@@ -135,6 +136,9 @@ int main(int argc, char *argv[])
 				break;
 			case 't':
 				tflag = 1;
+				break;
+			case 'v':
+				vflag = 1;
 				break;
 			case 'w':
 				wflag = 1;
@@ -187,6 +191,11 @@ int main(int argc, char *argv[])
 	}
 	argc -= optind;
 	argv += optind;
+
+	if (vflag) {
+		printf("%s: %s\n", progname, SICAT_VERSION);
+		exit(0);
+	}
 
 	if (argc != 1) {
 		usage();
