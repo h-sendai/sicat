@@ -147,7 +147,7 @@ USAGE:
 	}
 ************************************************************************ */
 
-int write_udp(int sockfd, char *buf, int nbytes)
+int write_udp(int sockfd, unsigned char *buf, int nbytes)
 {
 	int n;
 	if ( (n = write(sockfd, buf, nbytes)) < 0) {
@@ -173,12 +173,11 @@ RETURN VALUES:
 
 USAGE:
 	char buf[] = "hello, world";
-	if (read_udp(sockfd, buf, sizeof(buf)) < 0) {
-		warn("read error");
+	if (read_udp(sockfd, buf, sizeof(buf)) < 0) { warn("read error");
 	}
 ************************************************************************ */
 
-int read_udp(int sockfd, char *buf, int nbytes)
+int read_udp(int sockfd, unsigned char *buf, int nbytes)
 {
 	int n;
 	if ( (n = read(sockfd, buf, nbytes)) < 0) {
@@ -298,8 +297,8 @@ USAGE:
 
 int
 set_data(sitcp_host_info *host_info, 
-	bcp_header *send_header, char *send_data,
-	bcp_header *recv_header, char *recv_data)
+	bcp_header *send_header, unsigned char *send_data,
+	bcp_header *recv_header, unsigned char *recv_data)
 {
 	int            sockfd;
 	int            n, packet_len;
