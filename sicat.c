@@ -304,7 +304,7 @@ int usage()
 {
 	char *help_message;
 	help_message = 
-"-a sec          Exit after sec seconds.  sec may be float number.\n"
+"-a sec:         Exit after sec seconds.  sec may be float number.\n"
 "-e event_num:   Number of events for every length requests.\n"
 "                Default is 4096.\n"
 "-g:             When interrupted, read all remaining data.\n"
@@ -318,6 +318,7 @@ int usage()
 "-p port:        Specify server port.  Default server port is 23.\n"
 "-q:             Do not display progress counter.  Does display summary.\n"
 "-t:             Prepend timestamp.\n" 
+"-v:             Display version number and exit.\n"
 "-w sleep_time:  Sleep sleep_time u seconds before each read() system call.\n"
 "-z:             Exit after 5 times zero event count\n"
 "-F:             Forever.  Ignore event number in -n option.\n"
@@ -330,6 +331,7 @@ int usage()
 "-S sleep_time:  Sleep sleep_time sec before sending every request.\n"
 "                You may use float number (e.g. -S 0.1).  Default is 0.\n"
 "-T timeout:     Specify timeout (sec).  May be float value.\n"
+"\n"
 "To save data, do not specify -N option and redirect output to file:\n"
 "sicat 192.168.0.16 > datafile\n"
 ;

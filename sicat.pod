@@ -2,16 +2,16 @@
 
 =head1 NAME
 
-B<sicat> -- Read from one PSD module
+B<sicat> -- Read data from one SiTCP-PSD module
 
 =head1 SYNOPSIS
 
-B<sicat> [-e event_num] [-F] [-g] [-h] [-I interleave] [-L] [-n request_num] [-N] [-r] [-s seconds] [-t] [-T timeout] [-w micro_seconds] [-Q] [-z] ip_address
+B<sicat> [B<options>] B<ip_address>
 
 =head1 DESCRIPTION
 
-B<sicat> reads from one PSD module or PSD module emulator.
-To save read data, you have to redirect the output like:
+B<sicat> reads data from one SiTCP-PSD module or SiTCP-PSD module emulator.
+If you want to save data, you have to redirect the output like:
 
   sicat 192.168.0.16 > data_file
 
@@ -20,31 +20,109 @@ B<-F> to request forever or B<-n> option to specify request count.
 
 =head1 OPTIONS
 
-Becase B<sicat> is used mainly as debugging tool, it has many options.
+B<sicat> has many options because its main purpose is to use as
+debugging tool.
 
-=over 4
+=over 8
 
-=item -e event_num
+=item B<-a> I<sec>
+
+Exit after I<sec> seconds.  I<sec> may be fload number.
+
+=item B<-e> I<event_num>
 
 Specify event number of each length request.  Default is 4096.
 
-=item -F
-
-Forever mode.  Send request forever until interrupt (Ctrl-C or alike).
-
-=item -g
+=item B<-g>
 
 Exit after reading all data and just before sending new length request
 when receive SIGINT or SIGTERM.
 If this option does not specified, exit immediately when receive
 SIGINT or SIGTERM.
 
-=item -h
+=item B<-h>
 
 Display help message.
 
-=item -I I<interleave count>
+=item B<-o>
 
-Display request counts, read bytes every I<interleave count>. 
+Print socket options and tcp_moderate_rcvbuf before run.
+
+=item B<-r>
+
+Print how many bytes each read() system call returns.
+
+=item B<-s> I<sleep_time>
+
+Sleep I<sleep_time> before sending the first request.
+You may use fload number (for example B<-s 0.1>.  Default is 0.
+
+=item B<-p> I<port>
+
+Specify port number of the SiTCP-PSD module.  Default port is 23.
+
+=item B<-q>
+
+Does not display progress counter, but display summary as usual.
+
+=item B<-t>
+
+Prepend timestamp.
+
+=item B<-v>
+
+Display version number and exit.
+
+=item B<-w> I<sleep_time>
+
+Sleep I<sleep_time> micro seconds before each read() system calls.
+
+=item B<-z>
+
+Exit after 5 times zero event count.
+
+=item B<-F>
+
+Forever mode.  Ignore event number in B<-n> option.
+
+=item B<-I> I<wait>
+
+Read data forever and print result evry I<wait> request times.
+This flag set B<-t>, B<-q> and B<-F> implicitly.
+
+=item B<-L>
+
+Does not send FIN but RST when socket closes.
+
+=item B<-N>
+
+Does not output received data even if output is redirect to a file.
+
+=item B<-Q>
+
+Really quiet mode.  Does not display progress counter, summary.
+
+=item B<-R> I<so_rcvbuf>
+
+Specify SO_RCVBUF socket option.  Deafault is system default.
+
+=item B<-S> I<sleep_time>
+
+Sleep I<sleep_time> seconds before sending every request.
+You may use float number (for example B<-S 0.1>).  Default is 0.
+
+=item B<-T> I<timeout>
+
+Specify timeout in seconds.  I<timeout> may be float number.
+
+=back
+
+=head1 AUTHOR
+
+Hiroshi SENDAI
+
+=head1 BUG
+
+Probably some.
 
 =cut
