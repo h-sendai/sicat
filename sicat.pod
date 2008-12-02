@@ -55,7 +55,7 @@ Print how many bytes each read() system call returns.
 =item B<-s> I<sleep_time>
 
 Sleep I<sleep_time> before sending the first request.
-You may use fload number (for example B<-s 0.1>.  Default is 0.
+You may use fload number (for example B<-s 0.1>).  Default is 0.
 
 =item B<-p> I<port>
 
@@ -87,7 +87,7 @@ Forever mode.  Ignore event number in B<-n> option.
 
 =item B<-I> I<wait>
 
-Read data forever and print result evry I<wait> request times.
+Read data forever and print result every I<wait> request times.
 This flag set B<-t>, B<-q> and B<-F> implicitly.
 
 =item B<-L>
