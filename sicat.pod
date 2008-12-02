@@ -1,3 +1,10 @@
+=for comment
+To format this file, use perldoc command:
+% perldoc sicat.pod
+You may create PostScript file by:
+% pod2man sicat.pod | groff -Tps -mandoc > sicat.ps
+=end comment
+
 =pod
 
 =head1 NAME
