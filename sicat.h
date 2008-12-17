@@ -1,7 +1,7 @@
 #ifndef _SELECT_TEST_H
 #define _SELECT_TEST_H 1
 
-#define SICAT_VERSION "1.1 (2008-12-02)"
+#define SICAT_VERSION "1.2 (2008-12-17)"
 
 /*
 buufer too large.  consume much time to memset(0).
@@ -48,6 +48,7 @@ extern int send_len_request_to_all(void);
 extern int init_host_info_counter(host_info *);
 extern int print_status(host_info *);
 extern char *gf_time(void);
+extern char *gf_time_sec(void);
 extern int print_sockopt(int);
 extern int print_tcp_moderate_rcvbuf(void);
 

@@ -1,5 +1,6 @@
 CFLAGS = -g -Wall -O0
 PROG = sicat
+OBJS += count_event_data.o
 OBJS += sicat.o
 OBJS += host_list.o
 OBJS += process_data.o

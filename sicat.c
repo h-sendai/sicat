@@ -1,9 +1,11 @@
+#include "event_data.h"
 #include "sicat.h"
 #include "myheader.h"
 #include "my_signal.h"
 
 static int usage(void);
 static void print_result(void);
+static void print_count_rate(double);
 static char *progname;
 
 unsigned char len_request[8];
@@ -11,24 +13,28 @@ unsigned char len_request[8];
 volatile sig_atomic_t total_events     = 0;
 volatile sig_atomic_t total_bytes      = 0;
 volatile sig_atomic_t has_interrupted  = 0;
-int request_count = 0;
-int gflag = 0;
-int rflag = 0;
-int wflag = 0;
+volatile sig_atomic_t has_alarm        = 0;
+
+int prev_total_bytes  = 0;
+int prev_total_events = 0;
+int request_count     = 0;
 int sleep_before_read = 0;
+
+int aflag = 0;
+int gflag = 0;
+int oflag = 0;
+int rflag = 0;
+int tflag = 0;
+int wflag = 0;
+int Cflag = 0;
+
+host_info *hp;
 
 void sig_int(int signo)
 {
-	if (signo == SIGINT) {
-		fprintf(stderr, "SIGINT\n");
-	}
-	if (signo == SIGALRM) {
-		fprintf(stderr, "SIGALRM\n");
-	}
-
-	if (gflag) {
+	fprintf(stderr, "SIGINT\n");
+	if (gflag) { 
 		has_interrupted = 1;
-		return;
 	}
 	else {
 		print_result();
@@ -38,7 +44,19 @@ void sig_int(int signo)
 		
 void sig_alarm(int signo)
 {
-	sig_int(signo);
+	has_alarm = 1;
+	if (! Cflag) {
+		fprintf(stderr, "SIGALRM\n");
+	}
+	if (aflag && !gflag) {
+		print_result();
+		if (oflag) {
+			print_tcp_moderate_rcvbuf();
+			print_sockopt(hp->sockfd);
+		}
+		exit(0);
+	}
+	return;
 }
 
 void sig_quit(int signo)
@@ -51,18 +69,14 @@ int main(int argc, char *argv[])
 	int ch;
 	int n_request;
 	int n_event;
-	host_info *hp;
 	float sleep_time = 0.0;
 	float timeout  = 2.0;
 	float sleep_on_request = 0.0;
-	int aflag = 0;
 	int eflag = 0;
 	int nflag = 0;
-	int oflag = 0;
 	int pflag = 0;
 	int sflag = 0;
 	int qflag = 0;
-	int tflag = 0;
 	int vflag = 0;
 	int zflag = 0;
 	int Fflag = 0;
@@ -95,7 +109,7 @@ int main(int argc, char *argv[])
 	n_request = 4;
 	n_event   = 4096;
 
-	while ((ch = getopt(argc, argv, "a:e:FghI:Ln:Nop:qQrR:s:S:tT:vw:z")) != -1) {
+	while ((ch = getopt(argc, argv, "a:C:e:FghI:Ln:Nop:qQrR:s:S:tT:vw:z")) != -1) {
 		switch (ch) {
 			case 'a':
 				aflag = 1;
@@ -146,6 +160,12 @@ int main(int argc, char *argv[])
 				break;
 			case 'z':
 				zflag = 1;
+				break;
+			case 'C':
+				Cflag = 1;
+				Fflag = 1;
+				qflag = 1;
+				alarm_usec = (atof(optarg) * 1000000);
 				break;
 			case 'F':
 				Fflag = 1;
@@ -204,8 +224,8 @@ int main(int argc, char *argv[])
 	
 	my_signal(SIGINT,  sig_int);
 	my_signal(SIGQUIT, sig_quit);
-	if (aflag) {
-		my_signal(SIGALRM, sig_int);
+	if (alarm_usec != 0) {
+		my_signal(SIGALRM, sig_alarm);
 		ualarm(alarm_usec, alarm_usec);
 	}
 
@@ -232,6 +252,14 @@ int main(int argc, char *argv[])
 		print_tcp_moderate_rcvbuf();
 		print_sockopt(hp->sockfd);
 	}
+	
+	if (Cflag) {
+		if (tflag) {
+			fprintf(stderr, "         ");
+		}
+		fprintf(stderr, "%s\n",
+		  "  PSD#0   PSD#1   PSD#2   PSD#3   PSD#4   PSD#5   PSD#6   PSD#7  MB/s");
+	}
 
 	/* XXX wait for data preparation */
 	if (sflag) {
@@ -240,8 +268,18 @@ int main(int argc, char *argv[])
 	}
 
 	for ( ; ; ) {
-		if (has_interrupted && gflag) {
-			break;
+		if (has_interrupted) {
+			if (gflag) {
+				break;
+			}
+		}
+		if (has_alarm) {
+			if (gflag && !Cflag) {
+				break;
+			}
+			if (Cflag) {
+				print_count_rate(alarm_usec);
+			}
 		}
 		if (! Fflag) {
 			if (request_count == n_request) {
@@ -284,10 +322,17 @@ int main(int argc, char *argv[])
 		if (! isatty(STDOUT_FILENO) && ! Nflag) {
 			write(STDOUT_FILENO, hp->data_buf, hp->data_counter);
 		}
+		if (Cflag) {
+			count_event_data(hp->data_buf, hp->data_counter);
+		}
 	}
 
 	if (! Qflag) {
 		print_result();
+		if (oflag) {
+			print_tcp_moderate_rcvbuf();
+			print_sockopt(hp->sockfd);
+		}
 	}
 	return 0;
 }
@@ -300,6 +345,29 @@ void print_result(void)
 	return;
 }
 	
+void print_count_rate(double u_time_diff)
+{
+	int i, count_diff;
+	double time_diff = u_time_diff / 1000000;
+	int byte_diff  = total_bytes  - prev_total_bytes;
+	//int event_diff = total_events - prev_total_events;
+
+	if (tflag) {
+		fprintf(stderr, "%s ", gf_time_sec());
+	}
+
+	for (i = 0; i < N_PSD_PER_MODULE; i++) {
+		count_diff = event_data_counter[i].total - event_data_counter[i].prev;
+		fprintf(stderr, "%7.2f ", count_diff / time_diff / 1000.0); /* kcps */
+		event_data_counter[i].prev = event_data_counter[i].total;
+	}
+	fprintf(stderr, "%6.3f\n", byte_diff / time_diff / 1024 / 1024);
+
+	has_alarm   = 0;
+	prev_total_bytes  = total_bytes;
+	prev_total_events = total_events;
+}
+
 int usage()
 {
 	char *help_message;
@@ -321,6 +389,9 @@ int usage()
 "-v:             Display version number and exit.\n"
 "-w sleep_time:  Sleep sleep_time u seconds before each read() system call.\n"
 "-z:             Exit after 5 times zero event count\n"
+"-C sec:         Print count rate and data transfer rate every sec\n"
+"                instead of progress display.\n"
+"                sec may be float number (e.g. -C 1.5)\n"
 "-F:             Forever.  Ignore event number in -n option.\n"
 "-I wait:        Get data forever and print result every wait request times.\n"
 "                This flag set -t, -q, and -F implicitly.\n"
@@ -336,7 +407,8 @@ int usage()
 "sicat 192.168.0.16 > datafile\n"
 ;
 
-	fprintf(stderr, "%s [options] ip_address\n", progname);
+	fprintf(stderr, "sicat: version %s\n", SICAT_VERSION);
+	fprintf(stderr, "Usage: %s [options] ip_address\n", progname);
 	fprintf(stderr, "%s", help_message);
 	exit(0);
 }

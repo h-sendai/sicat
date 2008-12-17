@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
+#include "event_data.h"
 #include "sicat.h"
 
+extern int Cflag;
 extern int rflag; 
 extern int wflag;
 extern int sleep_before_read;
