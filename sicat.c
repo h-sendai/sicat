@@ -38,6 +38,10 @@ void sig_int(int signo)
 	}
 	else {
 		print_result();
+		if (oflag) {
+			print_tcp_moderate_rcvbuf();
+			print_sockopt(hp->sockfd);
+		}
 		exit(0);
 	}
 }
