@@ -1,4 +1,4 @@
-CFLAGS = -g -Wall -O0
+CFLAGS = -g -Wall -O2
 PROG = sicat
 OBJS += count_event_data.o
 OBJS += sicat.o
