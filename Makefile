@@ -17,6 +17,7 @@ SRCS += gf_time.c
 SRCS += my_signal.h
 SRCS += my_signal.c
 SRCS += print_sockopt.c
+SRCS += set_timer.c
 NO_MAN = true
 NO_OBJ = true
 .include <bsd.prog.mk>

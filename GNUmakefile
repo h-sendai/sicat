@@ -9,6 +9,7 @@ OBJS += status.o
 OBJS += gf_time.o
 OBJS += my_signal.o
 OBJS += print_sockopt.o
+OBJS += set_timer.o
 
 $(PROG): $(OBJS)
 

@@ -2,10 +2,11 @@
 #include "sicat.h"
 #include "myheader.h"
 #include "my_signal.h"
+#include "set_timer.h"
 
 static int usage(void);
 static void print_result(void);
-static void print_count_rate(double);
+static void print_count_rate(struct timeval);
 static char *progname;
 
 unsigned char len_request[8];
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
 	int Tflag = 0;
 	int zero_count = 0;
 	int interleave_count = 0;
-	double alarm_usec = 0.0;
+    struct timeval interval = { 0, 0 };
 
 	int so_rcvbuf;
 	int port;
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
 			case 'a':
 				aflag = 1;
 				Fflag = 1;
-				alarm_usec = (atof(optarg) * 1000000);
+                interval = str2timeval(optarg);
 				break;
 			case 'e':
 				eflag = 1;
@@ -169,7 +170,8 @@ int main(int argc, char *argv[])
 				Cflag = 1;
 				Fflag = 1;
 				qflag = 1;
-				alarm_usec = (atof(optarg) * 1000000);
+                interval = str2timeval(optarg);
+				//alarm_usec = (atof(optarg) * 1000000);
 				break;
 			case 'F':
 				Fflag = 1;
@@ -228,9 +230,10 @@ int main(int argc, char *argv[])
 	
 	my_signal(SIGINT,  sig_int);
 	my_signal(SIGQUIT, sig_quit);
-	if (alarm_usec != 0) {
+	if (Cflag || aflag) {
 		my_signal(SIGALRM, sig_alarm);
-		ualarm(alarm_usec, alarm_usec);
+        set_timer(interval.tv_sec, interval.tv_usec, interval.tv_sec, interval.tv_usec);
+		// ualarm(alarm_usec, alarm_usec);
 	}
 
 	hp = create_host_info_struct(argv[0]);
@@ -282,7 +285,7 @@ int main(int argc, char *argv[])
 				break;
 			}
 			if (Cflag) {
-				print_count_rate(alarm_usec);
+				print_count_rate(interval);
 			}
 		}
 		if (! Fflag) {
@@ -349,10 +352,12 @@ void print_result(void)
 	return;
 }
 	
-void print_count_rate(double u_time_diff)
+//void print_count_rate(double u_time_diff)
+void print_count_rate(struct timeval interval)
 {
 	int i, count_diff;
-	double time_diff = u_time_diff / 1000000;
+	double time_diff = (double) interval.tv_sec + 0.000001*(double) interval.tv_usec;
+    fprintf(stderr, "time_diff: %.3f\n", time_diff);
 	int byte_diff  = total_bytes  - prev_total_bytes;
 	//int event_diff = total_events - prev_total_events;
 
