@@ -4,6 +4,9 @@
 #include "my_signal.h"
 #include "set_timer.h"
 
+host_info *host_list[1024];
+host_info *reverse_host_list[1024];
+
 static int usage(void);
 static void print_result(void);
 static void print_count_rate(struct timeval);

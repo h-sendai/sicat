@@ -34,8 +34,8 @@ typedef struct {
 	unsigned char data_buf[DATA_BUF_SIZE];
 } host_info;
 
-host_info *host_list[1024];
-host_info *reverse_host_list[1024];
+extern host_info *host_list[1024];
+extern host_info *reverse_host_list[1024];
 
 extern host_info *create_host_info_struct(char *);
 extern int prepare_host_list(int);
